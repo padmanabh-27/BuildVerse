@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-
+from notifications.models import Notification
 from skills.models import Skill
 
 from .models import Project, ProjectSkill, ProjectRole, JoinRequest, ProjectMember
@@ -204,6 +204,11 @@ class JoinRequestCreateView(APIView):
         join_request, created = JoinRequest.objects.get_or_create(
             project=project, user=request.user
         )
+        if created:
+            Notification.objects.create(
+                recipient=project.creator,
+                message=f"{request.user.username} requested to join {project.title}",
+            )
 
         serializer = JoinRequestSerializer(join_request)
 
@@ -249,6 +254,10 @@ class AcceptJoinRequestView(APIView):
 
         member, created = ProjectMember.objects.get_or_create(
             project=project, user=join_request.user, defaults={"role": role}
+        )
+        Notification.objects.create(
+            recipient=join_request.user,
+            message=f"Your request to join {project.title} was accepted",
         )
 
         serializer = ProjectMemberSerializer(member)
