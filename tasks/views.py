@@ -7,6 +7,8 @@ from projects.models import Project, ProjectMember
 from .models import Task, TaskComment
 from .serializers import TaskSerializer, TaskCommentSerializer
 from notifications.models import Notification
+from activity.models import Activity
+from django.contrib.auth.models import User
 
 
 class TaskListCreateView(APIView):
@@ -46,6 +48,11 @@ class TaskListCreateView(APIView):
             Notification.objects.create(
                 recipient=task.assigned_to,
                 message=f"You have been assigned '{task.title}'",
+            )
+            Activity.objects.create(
+                user=task.assigned_to,
+                activity_type="task",
+                message=f"You were assigned '{task.title}'",
             )
 
             return Response(serializer.data)
@@ -87,6 +94,17 @@ class TaskStatusUpdateView(APIView):
         task.status = request.data.get("status")
 
         task.save()
+        if task.status == "done":
+            Activity.objects.create(
+                user=task.created_by,
+                activity_type="task",
+                message=f"{task.assigned_to.username} completed '{task.title}'",
+            )
+            Activity.objects.create(
+                user=task.assigned_to,
+                activity_type="task",
+                message=f"You completed '{task.title}'",
+            )
 
         serializer = TaskSerializer(task)
 
@@ -117,3 +135,30 @@ class TaskCommentListCreateView(APIView):
         serializer = TaskCommentSerializer(comment)
 
         return Response(serializer.data)
+
+
+class UserTaskStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+
+        user = get_object_or_404(User, pk=pk)
+
+        tasks_assigned = Task.objects.filter(assigned_to=user).count()
+
+        tasks_completed = Task.objects.filter(
+            assigned_to=user, status=Task.Status.COMPLETED
+        ).count()
+
+        if tasks_assigned > 0:
+            completion_rate = (tasks_completed / tasks_assigned) * 100
+        else:
+            completion_rate = 0
+
+        return Response(
+            {
+                "tasks_assigned": tasks_assigned,
+                "tasks_completed": tasks_completed,
+                "completion_rate": round(completion_rate, 2),
+            }
+        )

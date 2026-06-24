@@ -30,6 +30,13 @@ urlpatterns = [
     path("api/tasks/", include("tasks.urls")),
     path("api/documents/", include("documents.urls")),
     path("api/notifications/", include("notifications.urls")),
+    path("api/portfolio/", include("portfolio.urls")),
+    path("api/search/", include("search_app.urls")),
+    path("api/dashboard/", include("dashboard.urls")),
+    path("api/activity/", include("activity.urls")),
+    path("api/ai/", include("ai_matching.urls")),
+    path("api/reviews/", include("reviews.urls")),
+    path("api/reputation/", include("reputation.urls")),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

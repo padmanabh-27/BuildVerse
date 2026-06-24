@@ -7,6 +7,7 @@ from projects.models import Project, ProjectMember
 from .models import ProjectDocument
 from .serializers import ProjectDocumentSerializer
 from notifications.models import Notification
+from activity.models import Activity
 
 
 class ProjectDocumentListCreateView(APIView):
@@ -50,6 +51,11 @@ class ProjectDocumentListCreateView(APIView):
             for member in members:
                 Notification.objects.create(
                     recipient=member.user,
+                    message=f"{request.user.username} uploaded '{document.title}'",
+                )
+                Activity.objects.create(
+                    user=member.user,
+                    activity_type="document",
                     message=f"{request.user.username} uploaded '{document.title}'",
                 )
 

@@ -14,25 +14,16 @@ class Skill(models.Model):
 
 
 class UserSkill(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='user_skills'
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_skills")
 
     skill = models.ForeignKey(
-        Skill,
-        on_delete=models.CASCADE
+        Skill, on_delete=models.CASCADE, related_name="user_skills"
     )
 
-    experience_years = models.DecimalField(
-        max_digits=3,
-        decimal_places=1,
-        default=0.0
-    )
+    experience_years = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
 
     class Meta:
-        unique_together = ['user', 'skill']
+        unique_together = ["user", "skill"]
 
     def __str__(self):
         return f"{self.user.username} - {self.skill.name}"

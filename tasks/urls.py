@@ -5,6 +5,7 @@ from .views import (
     TaskDetailView,
     TaskStatusUpdateView,
     TaskCommentListCreateView,
+    UserTaskStatsView,
 )
 
 urlpatterns = [
@@ -16,4 +17,6 @@ urlpatterns = [
     path("<int:pk>/status/", TaskStatusUpdateView.as_view()),
     # Comments
     path("<int:pk>/comments/", TaskCommentListCreateView.as_view()),
+    # User task statistics
+    path("stats/<int:pk>/", UserTaskStatsView.as_view()),
 ]

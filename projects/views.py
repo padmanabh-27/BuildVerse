@@ -5,6 +5,9 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from notifications.models import Notification
 from skills.models import Skill
+from activity.models import Activity
+from tasks.models import Task
+from documents.models import ProjectDocument
 
 from .models import Project, ProjectSkill, ProjectRole, JoinRequest, ProjectMember
 
@@ -209,6 +212,11 @@ class JoinRequestCreateView(APIView):
                 recipient=project.creator,
                 message=f"{request.user.username} requested to join {project.title}",
             )
+            Activity.objects.create(
+                user=project.creator,
+                activity_type="join_request",
+                message=f"{request.user.username} requested to join {project.title}",
+            )
 
         serializer = JoinRequestSerializer(join_request)
 
@@ -259,6 +267,11 @@ class AcceptJoinRequestView(APIView):
             recipient=join_request.user,
             message=f"Your request to join {project.title} was accepted",
         )
+        Activity.objects.create(
+            user=join_request.user,
+            activity_type="member",
+            message=f"You joined {project.title}",
+        )
 
         serializer = ProjectMemberSerializer(member)
 
@@ -297,3 +310,75 @@ class ProjectMemberListView(APIView):
         serializer = ProjectMemberSerializer(members, many=True)
 
         return Response(serializer.data)
+
+
+class ProjectStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+
+        project = get_object_or_404(Project, pk=pk)
+
+        is_member = (
+            request.user == project.creator
+            or ProjectMember.objects.filter(project=project, user=request.user).exists()
+        )
+
+        if not is_member:
+            return Response({"error": "Permission denied"}, status=403)
+
+        members_count = ProjectMember.objects.filter(project=project).count() + 1
+
+        tasks_total = Task.objects.filter(project=project).count()
+
+        tasks_completed = Task.objects.filter(project=project, status="done").count()
+
+        tasks_pending = tasks_total - tasks_completed
+
+        documents_count = ProjectDocument.objects.filter(project=project).count()
+
+        completion_percentage = (
+            (tasks_completed / tasks_total) * 100 if tasks_total > 0 else 0
+        )
+
+        data = {
+            "members_count": members_count,
+            "tasks_total": tasks_total,
+            "tasks_completed": tasks_completed,
+            "tasks_pending": tasks_pending,
+            "completion_percentage": round(completion_percentage, 2),
+            "documents_count": documents_count,
+        }
+
+        return Response(data)
+
+
+class CompleteProjectView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+
+        project = get_object_or_404(Project, pk=pk)
+
+        if request.user != project.creator:
+            return Response({"error": "Permission denied"}, status=403)
+
+        project.status = Project.Status.COMPLETED
+        project.save()
+
+        members = ProjectMember.objects.filter(project=project)
+
+        for member in members:
+
+            Notification.objects.create(
+                recipient=member.user,
+                message=f"{project.title} has been completed. Please rate your teammates.",
+            )
+
+            Activity.objects.create(
+                user=member.user,
+                activity_type="review",
+                message=f"Rate your teammates in {project.title}",
+            )
+
+        return Response({"message": f"{project.title} marked as completed"})

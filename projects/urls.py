@@ -12,6 +12,8 @@ from .views import (
     AcceptJoinRequestView,
     RejectJoinRequestView,
     ProjectMemberListView,
+    ProjectStatsView,
+    CompleteProjectView,
 )
 
 urlpatterns = [
@@ -28,4 +30,6 @@ urlpatterns = [
     path("join-requests/<int:pk>/accept/", AcceptJoinRequestView.as_view()),
     path("join-requests/<int:pk>/reject/", RejectJoinRequestView.as_view()),
     path("<int:pk>/members/", ProjectMemberListView.as_view()),
+    path("<int:pk>/stats/", ProjectStatsView.as_view()),
+    path("<int:pk>/complete/", CompleteProjectView.as_view()),
 ]
