@@ -12,6 +12,7 @@ from tasks.models import Task
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="user.username", read_only=True)
 
     skills = serializers.SerializerMethodField()
 
@@ -27,6 +28,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
 
         fields = [
+            "username",
             "bio",
             "country",
             "state",
