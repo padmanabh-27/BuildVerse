@@ -28,6 +28,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
 
         fields = [
+            "user",
             "username",
             "bio",
             "country",

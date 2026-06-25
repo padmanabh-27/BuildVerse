@@ -157,6 +157,7 @@ def match_users(
         # =================================================
         results.append(
             {
+                "user_id": user.id,
                 "username": user.username,
                 "match_percentage": round(score),
                 "details": {

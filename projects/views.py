@@ -8,7 +8,7 @@ from skills.models import Skill
 from activity.models import Activity
 from tasks.models import Task
 from documents.models import ProjectDocument
-
+from django.contrib.auth.models import User
 from .models import Project, ProjectSkill, ProjectRole, JoinRequest, ProjectMember
 
 from .serializers import (
@@ -331,7 +331,7 @@ class ProjectStatsView(APIView):
 
         tasks_total = Task.objects.filter(project=project).count()
 
-        tasks_completed = Task.objects.filter(project=project, status="done").count()
+        tasks_completed = Task.objects.filter(project=project, status="completed").count()
 
         tasks_pending = tasks_total - tasks_completed
 
@@ -382,3 +382,33 @@ class CompleteProjectView(APIView):
             )
 
         return Response({"message": f"{project.title} marked as completed"})
+
+
+class InviteUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_id, user_id):
+        project = get_object_or_404(Project, pk=project_id)
+        if request.user != project.creator:
+            return Response({"error": "Only project creator can invite members"}, status=403)
+        
+        invited_user = get_object_or_404(User, pk=user_id)
+        if invited_user == request.user:
+            return Response({"error": "You cannot invite yourself"}, status=400)
+            
+        # Check if already a member
+        if ProjectMember.objects.filter(project=project, user=invited_user).exists():
+            return Response({"error": "User is already a team member"}, status=400)
+            
+        # Create notification and activity
+        Notification.objects.create(
+            recipient=invited_user,
+            message=f"You have been invited by @{request.user.username} to join project '{project.title}'",
+        )
+        Activity.objects.create(
+            user=invited_user,
+            activity_type="join_request",
+            message=f"You were invited to join project '{project.title}' by @{request.user.username}",
+        )
+        
+        return Response({"message": f"Successfully sent invitation to @{invited_user.username}!"})

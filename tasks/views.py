@@ -94,7 +94,7 @@ class TaskStatusUpdateView(APIView):
         task.status = request.data.get("status")
 
         task.save()
-        if task.status == "done":
+        if task.status == "completed":
             Activity.objects.create(
                 user=task.created_by,
                 activity_type="task",

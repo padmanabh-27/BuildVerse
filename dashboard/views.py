@@ -15,9 +15,9 @@ class DashboardView(APIView):
         data = {
             "projects_created": Project.objects.filter(creator=request.user).count(),
             "projects_joined": ProjectMember.objects.filter(user=request.user).count(),
-            "tasks_assigned": Task.objects.filter(assigned_to=request.user).count(),
+            "tasks_assigned": Task.objects.filter(assigned_to=request.user).exclude(status="completed").count(),
             "tasks_completed": Task.objects.filter(
-                assigned_to=request.user, status="done"
+                assigned_to=request.user, status="completed"
             ).count(),
             "unread_notifications": Notification.objects.filter(
                 recipient=request.user, is_read=False
@@ -25,3 +25,4 @@ class DashboardView(APIView):
         }
 
         return Response(data)
+

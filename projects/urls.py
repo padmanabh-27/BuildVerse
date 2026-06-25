@@ -14,6 +14,7 @@ from .views import (
     ProjectMemberListView,
     ProjectStatsView,
     CompleteProjectView,
+    InviteUserView,
 )
 
 urlpatterns = [
@@ -32,4 +33,5 @@ urlpatterns = [
     path("<int:pk>/members/", ProjectMemberListView.as_view()),
     path("<int:pk>/stats/", ProjectStatsView.as_view()),
     path("<int:pk>/complete/", CompleteProjectView.as_view()),
+    path("<int:project_id>/invite/<int:user_id>/", InviteUserView.as_view()),
 ]
