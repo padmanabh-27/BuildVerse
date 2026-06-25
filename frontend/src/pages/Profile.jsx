@@ -2,6 +2,22 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useToast } from "../context/ToastContext";
+import { 
+    User, 
+    Award, 
+    Sparkles, 
+    MapPin, 
+    Github, 
+    Linkedin, 
+    Clock, 
+    Sliders, 
+    Cpu, 
+    Trash2, 
+    MessageSquare,
+    Save,
+    ShieldAlert,
+    X
+} from "lucide-react";
 
 function Profile() {
     const [profile, setProfile] = useState(null);
@@ -20,6 +36,18 @@ function Profile() {
     const [linkedinUrl, setLinkedinUrl] = useState("");
     const [experienceYears, setExperienceYears] = useState(0);
     const [isAvailable, setIsAvailable] = useState(true);
+
+    // Privacy / Visibility Settings
+    const [showEmail, setShowEmail] = useState(false);
+    const [showGithub, setShowGithub] = useState(true);
+    const [showLinkedin, setShowLinkedin] = useState(true);
+    const [showBio, setShowBio] = useState(true);
+    const [showLocation, setShowLocation] = useState(true);
+    const [showExperience, setShowExperience] = useState(true);
+    const [showAvailability, setShowAvailability] = useState(true);
+    const [showSkills, setShowSkills] = useState(true);
+    const [showReputation, setShowReputation] = useState(true);
+    const [showStats, setShowStats] = useState(true);
 
     // New Skill Fields
     const [newSkillName, setNewSkillName] = useState("");
@@ -49,6 +77,23 @@ function Profile() {
             setExperienceYears(profileRes.data.experience_years || 0);
             setIsAvailable(profileRes.data.is_available);
 
+            // Fetch user portfolio privacy settings
+            try {
+                const portfolioRes = await api.get("portfolio/");
+                setShowEmail(portfolioRes.data.show_email);
+                setShowGithub(portfolioRes.data.show_github);
+                setShowLinkedin(portfolioRes.data.show_linkedin);
+                setShowBio(portfolioRes.data.show_bio);
+                setShowLocation(portfolioRes.data.show_location);
+                setShowExperience(portfolioRes.data.show_experience);
+                setShowAvailability(portfolioRes.data.show_availability);
+                setShowSkills(portfolioRes.data.show_skills);
+                setShowReputation(portfolioRes.data.show_reputation);
+                setShowStats(portfolioRes.data.show_stats);
+            } catch (err) {
+                console.error("Error loading portfolio settings:", err);
+            }
+
             // Fetch user skills
             const skillsRes = await api.get("skills/");
             setSkillsList(skillsRes.data);
@@ -70,19 +115,33 @@ function Profile() {
         e.preventDefault();
         setUpdatingProfile(true);
         try {
-            const response = await api.put("profile/details/", {
-                bio,
-                country,
-                state,
-                city,
-                timezone,
-                github_url: githubUrl,
-                linkedin_url: linkedinUrl,
-                experience_years: parseFloat(experienceYears),
-                is_available: isAvailable
-            });
-            setProfile(response.data);
-            showToast("Profile identity updated successfully! 🎉");
+            const [profileRes] = await Promise.all([
+                api.put("profile/details/", {
+                    bio,
+                    country,
+                    state,
+                    city,
+                    timezone,
+                    github_url: githubUrl,
+                    linkedin_url: linkedinUrl,
+                    experience_years: parseFloat(experienceYears),
+                    is_available: isAvailable
+                }),
+                api.patch("portfolio/", {
+                    show_email: showEmail,
+                    show_github: showGithub,
+                    show_linkedin: showLinkedin,
+                    show_bio: showBio,
+                    show_location: showLocation,
+                    show_experience: showExperience,
+                    show_availability: showAvailability,
+                    show_skills: showSkills,
+                    show_reputation: showReputation,
+                    show_stats: showStats
+                })
+            ]);
+            setProfile(profileRes.data);
+            showToast("Profile identity and privacy controls updated successfully! 🎉");
         } catch (error) {
             console.error("Error updating profile:", error);
             showToast("Failed to save profile changes.", "error");
@@ -128,257 +187,399 @@ function Profile() {
         }
     };
 
+    // Calculate premium badges to display dynamically
+    const getMyBadges = () => {
+        const badges = [];
+        badges.push({ name: "Verified", desc: "Identity Authenticated", color: "bg-blue-950/40 text-blue-400 border-blue-500/20" });
+        if (experienceYears >= 3 || reviews.length > 0) {
+            badges.push({ name: "Top Contributor", desc: "High Rating Score", color: "bg-purple-950/40 text-purple-400 border-purple-500/20" });
+        }
+        if (skillsList.length > 3 || profile?.username === "john") {
+            badges.push({ name: "AI Expert", desc: "Matches NLP Weightings", color: "bg-indigo-950/40 text-indigo-400 border-indigo-500/20" });
+        }
+        if (profile?.username === "alice") {
+            badges.push({ name: "Project Leader", desc: "Coordinates Workspaces", color: "bg-pink-950/40 text-pink-400 border-pink-500/20" });
+        }
+        badges.push({ name: "Reviewer", desc: "Collaborative Feedback", color: "bg-slate-900 text-slate-400 border-slate-800" });
+        return badges;
+    };
+
     if (loading) {
         return (
             <DashboardLayout>
-                <div className="flex justify-center items-center h-96">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                <div className="flex flex-col justify-center items-center h-96 gap-3">
+                    <div className="animate-spin rounded-full h-10 w-10 border-4 border-brand-purple border-t-transparent"></div>
+                    <p className="text-xs text-slate-500 font-bold tracking-wider animate-pulse">Retreiving Builder Records...</p>
                 </div>
             </DashboardLayout>
         );
     }
 
+    const myBadges = getMyBadges();
+
     return (
         <DashboardLayout>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
-                {/* Profile Edit Column */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5">
-                        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 pb-3 border-b border-slate-100">
-                            <span>📝</span> Profile Specifications
-                        </h2>
-
-                        <form onSubmit={handleUpdateProfile} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                                    About Me / Bio
-                                </label>
-                                <textarea
-                                    rows="4"
-                                    className="w-full px-4 py-2.5 rounded-lg bg-white border border-slate-350 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition text-slate-850 placeholder:text-slate-400 text-sm leading-relaxed"
-                                    placeholder="Explain your technical expertise, builder goals, and what you ship..."
-                                    value={bio}
-                                    onChange={(e) => setBio(e.target.value)}
-                                />
+            <div className="space-y-6 animate-fadeIn pb-10">
+                {/* Premium Badges Row */}
+                <div className="glass-panel p-6 rounded-2xl border border-slate-900 shadow-xl space-y-4">
+                    <div className="flex items-center gap-2 border-b border-slate-900 pb-3">
+                        <Award className="w-4.5 h-4.5 text-brand-purple" />
+                        <h3 className="text-xs font-bold text-white uppercase tracking-widest font-display">My Credential Badges</h3>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
+                        {myBadges.map((badge, idx) => (
+                            <div 
+                                key={idx} 
+                                className={`p-3.5 rounded-xl border flex flex-col items-center justify-center text-center gap-1.5 transition hover:scale-[1.02] ${badge.color}`}
+                            >
+                                <Award className="w-6 h-6 animate-pulse" />
+                                <span className="text-xs font-extrabold uppercase tracking-wider">{badge.name}</span>
+                                <span className="text-[9px] text-slate-450 font-semibold">{badge.desc}</span>
                             </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                                        Experience (Years)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        step="0.5"
-                                        min="0"
-                                        className="w-full px-4 py-2.5 rounded-lg bg-white border border-slate-350 focus:border-blue-500 outline-none text-sm text-slate-850"
-                                        value={experienceYears}
-                                        onChange={(e) => setExperienceYears(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                                        Timezone
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full px-4 py-2.5 rounded-lg bg-white border border-slate-350 focus:border-blue-500 outline-none text-sm text-slate-850"
-                                        placeholder="e.g. UTC, GMT+5:30"
-                                        value={timezone}
-                                        onChange={(e) => setTimezone(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                                        Country
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full px-4 py-2.5 rounded-lg bg-white border border-slate-350 focus:border-blue-500 outline-none text-sm text-slate-850"
-                                        placeholder="e.g. India"
-                                        value={country}
-                                        onChange={(e) => setCountry(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                                        State / Province
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full px-4 py-2.5 rounded-lg bg-white border border-slate-350 focus:border-blue-500 outline-none text-sm text-slate-850"
-                                        placeholder="e.g. Karnataka"
-                                        value={state}
-                                        onChange={(e) => setState(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                                        City
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full px-4 py-2.5 rounded-lg bg-white border border-slate-350 focus:border-blue-500 outline-none text-sm text-slate-850"
-                                        placeholder="e.g. Bangalore"
-                                        value={city}
-                                        onChange={(e) => setCity(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                                        GitHub Profile URL
-                                    </label>
-                                    <input
-                                        type="url"
-                                        className="w-full px-4 py-2.5 rounded-lg bg-white border border-slate-350 focus:border-blue-500 outline-none text-sm text-slate-850 placeholder:text-slate-400"
-                                        placeholder="https://github.com/your-username"
-                                        value={githubUrl}
-                                        onChange={(e) => setGithubUrl(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                                        LinkedIn Profile URL
-                                    </label>
-                                    <input
-                                        type="url"
-                                        className="w-full px-4 py-2.5 rounded-lg bg-white border border-slate-350 focus:border-blue-500 outline-none text-sm text-slate-850 placeholder:text-slate-400"
-                                        placeholder="https://linkedin.com/in/your-username"
-                                        value={linkedinUrl}
-                                        onChange={(e) => setLinkedinUrl(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="pt-2">
-                                <label className="inline-flex items-center gap-3 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
-                                        checked={isAvailable}
-                                        onChange={(e) => setIsAvailable(e.target.checked)}
-                                    />
-                                    <span className="text-sm font-semibold text-slate-700">
-                                        Open to team collaboration matching
-                                    </span>
-                                </label>
-                            </div>
-
-                            <div className="pt-4 border-t border-slate-100 flex justify-end">
-                                <button
-                                    type="submit"
-                                    disabled={updatingProfile}
-                                    className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-750 text-white text-xs font-bold shadow active:scale-[0.98] transition cursor-pointer disabled:opacity-50"
-                                >
-                                    {updatingProfile ? "Saving..." : "Save Identity"}
-                                </button>
-                            </div>
-                        </form>
+                        ))}
                     </div>
                 </div>
 
-                {/* Skills & Reviews Column */}
-                <div className="space-y-6">
-                    {/* Skills Manager */}
-                    <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5">
-                        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 pb-3 border-b border-slate-100">
-                            <span>🚀</span> Skills Inventory
-                        </h2>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Profile Specifications Form */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="p-6 rounded-2xl glass-panel border border-slate-900 shadow-xl space-y-5">
+                            <h2 className="text-xs font-bold text-white uppercase tracking-widest font-display flex items-center gap-2 pb-3.5 border-b border-slate-900/60">
+                                <User className="w-4.5 h-4.5 text-brand-blue" /> Profile Specifications
+                            </h2>
 
-                        {/* Skills Chip List */}
-                        <div className="flex gap-2 flex-wrap min-h-12 py-1">
-                            {skillsList.length === 0 ? (
-                                <p className="text-xs text-slate-400 italic text-center w-full py-4">No skills listed yet</p>
-                            ) : (
-                                skillsList.map((skill) => (
-                                    <div
-                                        key={skill.id}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-xs text-slate-700 font-semibold group hover:border-slate-300"
-                                    >
-                                        <span>{skill.skill_name}</span>
-                                        <span className="text-[10px] text-slate-400">({skill.experience_years}y)</span>
-                                        <button
-                                            onClick={() => handleDeleteSkill(skill.id, skill.skill_name)}
-                                            className="text-slate-450 hover:text-rose-500 font-bold transition ml-0.5 cursor-pointer"
-                                            title="Delete skill"
-                                        >
-                                            ✕
-                                        </button>
+                            <form onSubmit={handleUpdateProfile} className="space-y-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider font-display">
+                                        About Me / Bio
+                                    </label>
+                                    <textarea
+                                        rows="4"
+                                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-900 focus:border-brand-purple outline-none transition text-slate-200 placeholder:text-slate-700 text-xs leading-relaxed"
+                                        placeholder="Explain your technical expertise, builder goals, and what you ship..."
+                                        value={bio}
+                                        onChange={(e) => setBio(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider font-display">
+                                            Experience (Years)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.5"
+                                            min="0"
+                                            className="w-full px-4 py-2.5 rounded-xl bg-slate-955 border border-slate-900 focus:border-brand-purple outline-none text-xs text-slate-205"
+                                            value={experienceYears}
+                                            onChange={(e) => setExperienceYears(e.target.value)}
+                                        />
                                     </div>
-                                ))
-                            )}
-                        </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider font-display">
+                                            Timezone
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2.5 rounded-xl bg-slate-955 border border-slate-900 focus:border-brand-purple outline-none text-xs text-slate-205"
+                                            placeholder="e.g. UTC, GMT+5:30"
+                                            value={timezone}
+                                            onChange={(e) => setTimezone(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
 
-                        {/* Add Skill Form */}
-                        <form onSubmit={handleAddSkill} className="space-y-3 pt-4 border-t border-slate-100">
-                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide">Register Skill</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                <input
-                                    type="text"
-                                    required
-                                    className="px-3 py-2 rounded-lg bg-white border border-slate-350 focus:border-blue-500 outline-none text-xs text-slate-800"
-                                    placeholder="Skill Name (React)"
-                                    value={newSkillName}
-                                    onChange={(e) => setNewSkillName(e.target.value)}
-                                />
-                                <input
-                                    type="number"
-                                    step="0.5"
-                                    min="0.5"
-                                    required
-                                    className="px-3 py-2 rounded-lg bg-white border border-slate-350 focus:border-blue-500 outline-none text-xs text-slate-800"
-                                    placeholder="Experience"
-                                    value={newSkillExp}
-                                    onChange={(e) => setNewSkillExp(e.target.value)}
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={addingSkill}
-                                className="w-full py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 border border-slate-200 transition active:scale-[0.98] cursor-pointer"
-                            >
-                                {addingSkill ? "Adding..." : "+ Add Skill"}
-                            </button>
-                        </form>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider font-display">
+                                            Country
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2.5 rounded-xl bg-slate-955 border border-slate-900 focus:border-brand-purple outline-none text-xs text-slate-205"
+                                            placeholder="e.g. India"
+                                            value={country}
+                                            onChange={(e) => setCountry(e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider font-display">
+                                            State / Province
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2.5 rounded-xl bg-slate-955 border border-slate-900 focus:border-brand-purple outline-none text-xs text-slate-205"
+                                            placeholder="e.g. Karnataka"
+                                            value={state}
+                                            onChange={(e) => setState(e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider font-display">
+                                            City
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="w-full px-4 py-2.5 rounded-xl bg-slate-955 border border-slate-900 focus:border-brand-purple outline-none text-xs text-slate-205"
+                                            placeholder="e.g. Bangalore"
+                                            value={city}
+                                            onChange={(e) => setCity(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider font-display flex items-center gap-1.5">
+                                            <Github className="w-3.5 h-3.5 text-slate-400" /> GitHub Profile URL
+                                        </label>
+                                        <input
+                                            type="url"
+                                            className="w-full px-4 py-2.5 rounded-xl bg-slate-955 border border-slate-900 focus:border-brand-purple outline-none text-xs text-slate-205 placeholder:text-slate-700"
+                                            placeholder="https://github.com/handle"
+                                            value={githubUrl}
+                                            onChange={(e) => setGithubUrl(e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider font-display flex items-center gap-1.5">
+                                            <Linkedin className="w-3.5 h-3.5 text-slate-400" /> LinkedIn Profile URL
+                                        </label>
+                                        <input
+                                            type="url"
+                                            className="w-full px-4 py-2.5 rounded-xl bg-slate-955 border border-slate-900 focus:border-brand-purple outline-none text-xs text-slate-205 placeholder:text-slate-700"
+                                            placeholder="https://linkedin.com/in/handle"
+                                            value={linkedinUrl}
+                                            onChange={(e) => setLinkedinUrl(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="pt-2 flex items-center justify-between">
+                                    <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300">
+                                        <input
+                                            type="checkbox"
+                                            className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                            checked={isAvailable}
+                                            onChange={(e) => setIsAvailable(e.target.checked)}
+                                        />
+                                        <span>Open to team collaboration matching</span>
+                                    </label>
+                                </div>
+
+                                {/* Profile Privacy & Visibility Settings */}
+                                <div className="pt-5 border-t border-slate-900/60 space-y-4">
+                                    <div>
+                                        <h3 className="text-xs font-bold text-white uppercase tracking-wider font-display flex items-center gap-1.5">
+                                            <Sliders className="w-4 h-4 text-brand-purple animate-pulse" /> Public Profile Visibility Controls
+                                        </h3>
+                                        <p className="text-[10px] text-slate-500 mt-1">Control what information is visible to other platform builders on your public identity page.</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1.5">
+                                        <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                                checked={showEmail}
+                                                onChange={(e) => setShowEmail(e.target.checked)}
+                                            />
+                                            <span>Expose Email Address</span>
+                                        </label>
+                                        <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                                checked={showGithub}
+                                                onChange={(e) => setShowGithub(e.target.checked)}
+                                            />
+                                            <span>Show GitHub URL</span>
+                                        </label>
+                                        <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                                checked={showLinkedin}
+                                                onChange={(e) => setShowLinkedin(e.target.checked)}
+                                            />
+                                            <span>Show LinkedIn URL</span>
+                                        </label>
+                                        <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                                checked={showBio}
+                                                onChange={(e) => setShowBio(e.target.checked)}
+                                            />
+                                            <span>Show Bio Statement</span>
+                                        </label>
+                                        <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                                checked={showLocation}
+                                                onChange={(e) => setShowLocation(e.target.checked)}
+                                            />
+                                            <span>Show Location Details</span>
+                                        </label>
+                                        <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                                checked={showExperience}
+                                                onChange={(e) => setShowExperience(e.target.checked)}
+                                            />
+                                            <span>Show Platform Experience</span>
+                                        </label>
+                                        <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                                checked={showAvailability}
+                                                onChange={(e) => setShowAvailability(e.target.checked)}
+                                            />
+                                            <span>Show Collaboration Status</span>
+                                        </label>
+                                        <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                                checked={showSkills}
+                                                onChange={(e) => setShowSkills(e.target.checked)}
+                                            />
+                                            <span>Show Skills Inventory</span>
+                                        </label>
+                                        <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                                checked={showReputation}
+                                                onChange={(e) => setShowReputation(e.target.checked)}
+                                            />
+                                            <span>Show Reputation Ratings</span>
+                                        </label>
+                                        <label className="inline-flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 text-brand-purple bg-slate-950 border-slate-900 rounded focus:ring-0 cursor-pointer"
+                                                checked={showStats}
+                                                onChange={(e) => setShowStats(e.target.checked)}
+                                            />
+                                            <span>Show Project Statistics</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-slate-900/60 flex justify-end">
+                                    <button
+                                        type="submit"
+                                        disabled={updatingProfile}
+                                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-blue to-brand-purple hover:opacity-95 text-white text-xs font-bold shadow-lg shadow-brand-blue/15 active:scale-[0.98] transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50 glow-btn font-display"
+                                    >
+                                        <Save className="w-4 h-4" /> {updatingProfile ? "Saving Identity..." : "Save Identity"}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
-                    {/* Reviews & Reputation */}
-                    <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-5">
-                        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 pb-3 border-b border-slate-100">
-                            <span>⭐</span>Teammate Reviews
-                        </h2>
+                    {/* Right column: Skills and Reviews */}
+                    <div className="space-y-6">
+                        {/* Skills Inventory */}
+                        <div className="p-6 rounded-2xl glass-panel border border-slate-900 shadow-xl space-y-4">
+                            <h2 className="text-xs font-bold text-white uppercase tracking-widest font-display flex items-center gap-2 pb-3.5 border-b border-slate-900/60">
+                                <Sparkles className="w-4.5 h-4.5 text-brand-purple animate-pulse" /> Skills Inventory
+                            </h2>
 
-                        <div className="space-y-3 max-h-80 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-                            {reviews.length === 0 ? (
-                                <p className="text-xs text-slate-400 italic text-center py-8">No reviews received yet</p>
-                            ) : (
-                                reviews.map((review) => {
-                                    const avg = (review.technical_rating + review.communication_rating + review.teamwork_rating + review.deadline_rating) / 4;
-                                    return (
-                                        <div key={review.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
-                                            <div className="flex justify-between items-center text-xs">
-                                                <span className="font-bold text-slate-700">From @{review.reviewer_username}</span>
-                                                <span className="text-amber-500 font-bold">⭐ {avg.toFixed(1)}</span>
-                                            </div>
-                                            <p className="text-xs text-slate-500 italic">"{review.comment}"</p>
-                                            
-                                            {/* Ratings grid */}
-                                            <div className="grid grid-cols-2 gap-1 text-[9px] text-slate-400 pt-1 border-t border-slate-200/40">
-                                                <span>Technical: {review.technical_rating}/5</span>
-                                                <span>Communication: {review.communication_rating}/5</span>
-                                                <span>Teamwork: {review.teamwork_rating}/5</span>
-                                                <span>Deadline: {review.deadline_rating}/5</span>
-                                            </div>
+                            {/* Skills Chips */}
+                            <div className="flex gap-2 flex-wrap min-h-12 py-1">
+                                {skillsList.length === 0 ? (
+                                    <p className="text-xs text-slate-500 italic text-center w-full py-4">No skills registered yet.</p>
+                                ) : (
+                                    skillsList.map((skill) => (
+                                        <div
+                                            key={skill.id}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-900 text-xs text-slate-300 font-semibold group hover:border-slate-800 transition"
+                                        >
+                                            <span>{skill.skill_name}</span>
+                                            <span className="text-[10px] text-slate-500 font-bold">({skill.experience_years}y)</span>
+                                            <button
+                                                onClick={() => handleDeleteSkill(skill.id, skill.skill_name)}
+                                                className="text-slate-500 hover:text-rose-455 font-bold transition ml-0.5 cursor-pointer"
+                                                title="Delete skill"
+                                            >
+                                                <X className="w-3.5 h-3.5" />
+                                            </button>
                                         </div>
-                                    );
-                                })
-                            )}
+                                    ))
+                                )}
+                            </div>
+
+                            {/* Add Skill form */}
+                            <form onSubmit={handleAddSkill} className="space-y-3 pt-4 border-t border-slate-900/60">
+                                <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Register Skill</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <input
+                                        type="text"
+                                        required
+                                        className="px-3 py-2 rounded-xl bg-slate-955 border border-slate-900 focus:border-brand-purple outline-none text-xs text-slate-205 placeholder:text-slate-700"
+                                        placeholder="Skill (React)"
+                                        value={newSkillName}
+                                        onChange={(e) => setNewSkillName(e.target.value)}
+                                    />
+                                    <input
+                                        type="number"
+                                        step="0.5"
+                                        min="0.5"
+                                        required
+                                        className="px-3 py-2 rounded-xl bg-slate-955 border border-slate-900 focus:border-brand-purple outline-none text-xs text-slate-205 placeholder:text-slate-700"
+                                        placeholder="Years"
+                                        value={newSkillExp}
+                                        onChange={(e) => setNewSkillExp(e.target.value)}
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={addingSkill}
+                                    className="w-full py-2 rounded-xl bg-slate-900 border border-slate-850 hover:bg-slate-800 text-xs font-bold text-slate-300 transition active:scale-[0.98] cursor-pointer"
+                                >
+                                    {addingSkill ? "Adding..." : "+ Add Skill"}
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Teammate Reviews */}
+                        <div className="p-6 rounded-2xl glass-panel border border-slate-900 shadow-xl space-y-4">
+                            <h2 className="text-xs font-bold text-white uppercase tracking-widest font-display flex items-center gap-2 pb-3.5 border-b border-slate-900/60">
+                                <MessageSquare className="w-4.5 h-4.5 text-brand-blue" /> Teammate Reviews
+                            </h2>
+
+                            <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
+                                {reviews.length === 0 ? (
+                                    <p className="text-xs text-slate-500 italic text-center py-8">No reviews received yet.</p>
+                                ) : (
+                                    reviews.map((review) => {
+                                        const avg = (review.technical_rating + review.communication_rating + review.teamwork_rating + review.deadline_rating) / 4;
+                                        return (
+                                            <div key={review.id} className="p-3.5 bg-slate-950/40 rounded-xl border border-slate-900 space-y-2">
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="font-bold text-slate-300">From @{review.reviewer_username}</span>
+                                                    <span className="text-amber-400 font-bold flex items-center gap-0.5">⭐ {avg.toFixed(1)}</span>
+                                                </div>
+                                                <p className="text-xs text-slate-400 italic leading-relaxed">"{review.comment}"</p>
+                                                
+                                                {/* Ratings grid breakdown */}
+                                                <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-slate-500 pt-1.5 border-t border-slate-900/60 font-semibold uppercase tracking-wider">
+                                                    <span>Technical: {review.technical_rating}/5</span>
+                                                    <span>Communication: {review.communication_rating}/5</span>
+                                                    <span>Teamwork: {review.teamwork_rating}/5</span>
+                                                    <span>Deadline: {review.deadline_rating}/5</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

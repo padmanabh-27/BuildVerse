@@ -1,36 +1,134 @@
 @import "tailwindcss";
 
 @theme {
-  --animate-fadeIn: fadeIn 0.25s ease-out forwards;
-  --animate-slideDown: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-scaleUp: scaleUp 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  --font-sans: "Outfit", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Outfit", system-ui, -apple-system, sans-serif;
+  
+  /* Dark slate brand palette — dark enough for white text buttons, accent for outlines */
+  --color-brand-purple: #334155; /* dark slate — used as bg on buttons */
+  --color-brand-blue: #1e293b;   /* darker slate — gradient start for buttons */
+  --color-brand-pink: #475569;   /* medium slate */
+
+  /* Override Indigo palette — dark slate tones for buttons/backgrounds */
+  --color-indigo-400: #94a3b8;   /* silver — used for text/icons on dark bg */
+  --color-indigo-500: #64748b;   /* slate — border accents */
+  --color-indigo-600: #475569;   /* medium dark — button backgrounds */
+  --color-indigo-700: #334155;   /* dark slate */
+  --color-indigo-800: #1e293b;   /* very dark slate */
+  --color-indigo-950: #0f1117;   /* near-black */
+
+  /* Override Purple palette — also dark slate for button backgrounds */
+  --color-purple-400: #94a3b8;   /* silver text */
+  --color-purple-500: #64748b;   /* slate accent */
+  --color-purple-600: #475569;   /* dark button bg */
+  --color-purple-650: #334155;
+  --color-purple-950: #0c0f17;
+  
+  --animate-fadeIn: fadeIn 0.3s ease-out forwards;
+  --animate-slideUp: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-pulseGlow: pulseGlow 3s infinite ease-in-out;
+  --animate-scaleUp: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(4px); }
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-8px); }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes scaleUp {
-    from { opacity: 0; transform: scale(0.96); }
+    from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
   }
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.3; filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.08)); }
+    50% { opacity: 0.6; filter: drop-shadow(0 0 24px rgba(255, 255, 255, 0.15)); }
+  }
+}
+
+/* Glassmorphism & premium UI classes */
+.glass-panel {
+  background: rgba(12, 13, 18, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Premium white-to-silver text gradient */
+.text-gradient {
+  background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 50%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gradient-premium {
+  background: linear-gradient(135deg, #0c0d12 0%, #131520 40%, #0c0d12 100%);
+}
+
+.glow-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.glow-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: 0.75s;
+}
+
+.glow-btn:hover::after {
+  left: 125%;
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Custom premium scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(12, 13, 18, 0.4);
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgba(203, 213, 225, 0.15);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(203, 213, 225, 0.3);
+}
+
+/* Custom styles for Kanban cards and badges */
+.badge-premium {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(203, 213, 225, 0.2);
+}
+
+.badge-ai {
+  box-shadow: 0 0 10px rgba(226, 232, 240, 0.08);
+  border: 1.5px solid rgba(226, 232, 240, 0.15);
 }

@@ -2,6 +2,21 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import LightRays from "../components/LightRays";
+import { 
+    LayoutDashboard, 
+    Briefcase, 
+    Users, 
+    Sparkles, 
+    Search, 
+    User, 
+    Bell, 
+    LogOut, 
+    Layers, 
+    ChevronLeft, 
+    ChevronRight,
+    Settings
+} from "lucide-react";
 
 function DashboardLayout({ children }) {
     const navigate = useNavigate();
@@ -19,7 +34,7 @@ function DashboardLayout({ children }) {
 
     useEffect(() => {
         fetchNotifications();
-        const interval = setInterval(fetchNotifications, 10000);
+        const interval = setInterval(fetchNotifications, 15000);
         return () => clearInterval(interval);
     }, []);
 
@@ -68,107 +83,112 @@ function DashboardLayout({ children }) {
         {
             path: "/dashboard",
             name: "Dashboard",
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
-                </svg>
-            )
+            icon: <LayoutDashboard className="w-5 h-5" />
         },
         {
             path: "/projects",
-            name: "Projects",
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-            )
+            name: "Projects Feed",
+            icon: <Briefcase className="w-5 h-5" />
         },
         {
             path: "/teams",
             name: "Teams Workspace",
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-            )
+            icon: <Users className="w-5 h-5" />
         },
         {
             path: "/matching",
             name: "AI Recruiter",
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.904-4.88M18 10a8 8 0 11-16 0 8 8 0 0116 0zM12 14a2 2 0 100-4 2 2 0 000 4z" />
-                </svg>
-            )
+            icon: <Sparkles className="w-5 h-5 text-indigo-400" />
         },
         {
             path: "/search",
-            name: "Search Developers",
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            )
+            name: "Match Developers",
+            icon: <Search className="w-5 h-5" />
         },
         {
             path: "/profile",
             name: "My Profile",
-            icon: (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-            )
+            icon: <User className="w-5 h-5" />
         }
     ];
 
     const getPageTitle = () => {
-        if (location.pathname === "/dashboard") return "Dashboard";
-        if (location.pathname === "/projects") return "Projects directory";
-        if (location.pathname.startsWith("/projects/")) return "Workspace";
-        if (location.pathname === "/teams") return "Teams";
-        if (location.pathname === "/matching") return "AI Matching recruiter";
-        if (location.pathname === "/search") return "Search Developers";
-        if (location.pathname === "/profile") return "My Profile";
-        return "BuildVerse";
+        if (location.pathname === "/dashboard") return "Hub Overview";
+        if (location.pathname === "/projects") return "Collaborative Projects";
+        if (location.pathname.startsWith("/projects/")) return "Project Command Workspace";
+        if (location.pathname === "/teams") return "Active Teams";
+        if (location.pathname === "/matching") return "AI Matching Recruiter Pipeline";
+        if (location.pathname === "/search") return "Discover Talent & Collaborators";
+        if (location.pathname === "/profile") return "My Builder Identity";
+        return "BuildVerse Workspace";
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800 flex overflow-hidden font-sans">
+        <div className="min-h-screen text-slate-100 flex overflow-hidden font-sans relative" style={{ backgroundColor: '#0c0d12' }}>
+            {/* Interactive Light Rays Background — white top-center spotlight */}
+            <div className="absolute inset-0 z-0 pointer-events-none" style={{ opacity: 0.28 }}>
+                <LightRays
+                    raysOrigin="top-center"
+                    raysColor="#ffffff"
+                    raysSpeed={0.6}
+                    lightSpread={0.5}
+                    rayLength={1.5}
+                    pulsating={false}
+                    fadeDistance={1.2}
+                    saturation={0.0}
+                    followMouse={true}
+                    mouseInfluence={0.06}
+                    noiseAmount={0.02}
+                    distortion={0.01}
+                />
+            </div>
+
+            {/* Ambient silver-white gradients */}
+            <div className="absolute top-[5%] left-[25%] w-[600px] h-[600px] rounded-full blur-[160px] pointer-events-none animate-pulseGlow" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)' }}></div>
+            <div className="absolute bottom-[5%] right-[5%] w-[350px] h-[350px] rounded-full blur-[120px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(203,213,225,0.03) 0%, transparent 70%)' }}></div>
+
             {/* Sidebar */}
-            <aside className={`bg-white border-r border-slate-200 flex flex-col justify-between z-20 shrink-0 transition-all duration-200 ${
-                sidebarCollapsed ? "w-16" : "w-64"
+            <aside className={`glass-panel border-r border-slate-900 flex flex-col justify-between z-20 shrink-0 transition-all duration-300 relative ${
+                sidebarCollapsed ? "w-20" : "w-64"
             }`}>
                 <div>
                     {/* Header Logo */}
-                    <div className="h-16 px-4 border-b border-slate-200 flex items-center justify-between">
-                        {!sidebarCollapsed && (
-                            <Link to="/dashboard" className="flex items-center gap-2 font-black text-xl text-blue-600">
-                                BuildVerse <span className="text-sm">🚀</span>
+                    <div className="h-16 px-5 border-b border-slate-900/60 flex items-center justify-between">
+                        {!sidebarCollapsed ? (
+                            <Link to="/dashboard" className="flex items-center gap-2 font-black text-lg text-white font-display">
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md" style={{ background: 'linear-gradient(135deg, #334155, #64748b)' }}>
+                                    <Layers className="w-4 h-4 text-white" />
+                                </div>
+                                <span>Build<span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #cbd5e1, #f8fafc)', WebkitBackgroundClip: 'text' }}>Verse</span></span>
                             </Link>
-                        )}
-                        {sidebarCollapsed && (
-                            <Link to="/dashboard" className="mx-auto font-black text-xl text-blue-600">
-                                B🚀
+                        ) : (
+                            <Link to="/dashboard" className="mx-auto flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #334155, #64748b)' }}>
+                                    <Layers className="w-4.5 h-4.5 text-white" />
+                                </div>
                             </Link>
                         )}
                     </div>
 
                     {/* Navigation Menu */}
-                    <nav className="p-3 space-y-1">
+                    <nav className="p-4 space-y-1.5">
                         {menuItems.map(item => {
                             const isActive = location.pathname === item.path;
                             return (
                                 <Link
                                     key={item.path}
                                     to={item.path}
-                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition group text-sm font-medium ${
+                                    className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-all duration-200 group text-sm font-semibold relative ${
                                         isActive
-                                            ? "bg-blue-50 text-blue-600"
-                                            : "text-slate-650 hover:bg-slate-100 hover:text-slate-900"
+                                            ? "bg-slate-900/80 text-white border border-slate-800 shadow-inner glow-hover"
+                                            : "text-slate-400 hover:bg-slate-900/40 hover:text-white border border-transparent"
                                     }`}
                                     title={sidebarCollapsed ? item.name : ""}
                                 >
-                                    <span className={isActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"}>
+                                    {isActive && (
+                                        <div className="absolute left-0 top-1/4 bottom-1/4 w-0.5 rounded-r-full" style={{ background: 'linear-gradient(to bottom, #f8fafc, #94a3b8)' }}></div>
+                                    )}
+                                    <span className={isActive ? "text-white" : "text-slate-500 group-hover:text-slate-350"}>
                                         {item.icon}
                                     </span>
                                     {!sidebarCollapsed && <span>{item.name}</span>}
@@ -179,29 +199,23 @@ function DashboardLayout({ children }) {
                 </div>
 
                 {/* Collapsible toggle & User Summary */}
-                <div className="p-3 border-t border-slate-200 bg-white">
+                <div className="p-4 border-t border-slate-900 bg-slate-950/20">
                     <button
                         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                        className="w-full flex items-center justify-center p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 mb-2 cursor-pointer"
+                        className="w-full flex items-center justify-center p-2 rounded-xl text-slate-500 hover:bg-slate-900/60 hover:text-slate-350 mb-3 cursor-pointer border border-transparent hover:border-slate-800 transition"
                         title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
                     >
-                        <svg className="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            {sidebarCollapsed ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                            ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7M19 19l-7-7 7-7" />
-                            )}
-                        </svg>
+                        {sidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
                     </button>
 
                     {!sidebarCollapsed && user && (
-                        <div className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-50 border border-slate-100 text-xs">
-                            <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold capitalize">
+                        <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/40 border border-slate-900/80 text-xs">
+                            <div className="w-8 h-8 rounded-xl text-white flex items-center justify-center font-bold capitalize shadow-sm text-sm" style={{ background: 'linear-gradient(135deg, #334155, #64748b)' }}>
                                 {user.username ? user.username[0] : "U"}
                             </div>
                             <div className="overflow-hidden">
-                                <p className="font-bold text-slate-800 truncate capitalize">{user.username}</p>
-                                <span className="text-[10px] text-slate-450 truncate block">Developer Partner</span>
+                                <p className="font-semibold text-slate-200 truncate capitalize">{user.username}</p>
+                                <span className="text-[10px] text-slate-500 truncate block">Co-Builder</span>
                             </div>
                         </div>
                     )}
@@ -209,59 +223,57 @@ function DashboardLayout({ children }) {
             </aside>
 
             {/* Main Wrapper */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 {/* Header Navbar */}
-                <header className="h-16 px-6 border-b border-slate-200 bg-white flex items-center justify-between z-10 shrink-0">
-                    <h2 className="text-lg font-bold text-slate-800">{getPageTitle()}</h2>
+                <header className="h-16 px-6 border-b border-slate-900/60 glass-panel flex items-center justify-between z-10 shrink-0">
+                    <h2 className="text-base font-bold text-white tracking-tight font-display">{getPageTitle()}</h2>
 
                     {/* Right side items */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3.5">
                         {/* Notifications Bell */}
                         <div className="relative" ref={dropdownRef}>
                             <button
                                 onClick={() => setShowNotifications(!showNotifications)}
-                                className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700 relative cursor-pointer"
+                                className="p-2 rounded-xl bg-slate-900/40 border border-slate-900 hover:border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white relative cursor-pointer transition flex items-center justify-center"
                             >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
+                                <Bell className="w-4.5 h-4.5" />
                                 {unreadCount > 0 && (
-                                    <span className="absolute top-1 right-1 w-2 h-2 bg-blue-600 rounded-full"></span>
+                                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-slate-400 rounded-full animate-ping"></span>
                                 )}
                             </button>
 
                             {/* Dropdown Panel */}
                             {showNotifications && (
-                                <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-xl bg-white border border-slate-200 shadow-xl z-50 divide-y divide-slate-100 animate-scaleUp">
-                                    <div className="p-3 flex justify-between items-center bg-slate-50 sticky top-0">
-                                        <h4 className="font-bold text-xs text-slate-750">Notifications</h4>
-                                        <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold">
+                                <div className="absolute right-0 mt-2.5 w-80 max-h-96 overflow-y-auto rounded-2xl glass-panel shadow-2xl z-50 border border-slate-800 divide-y divide-slate-900/60 animate-scaleUp">
+                                    <div className="p-3.5 flex justify-between items-center bg-slate-900/40 sticky top-0 backdrop-blur-md">
+                                        <h4 className="font-bold text-xs text-white">Notifications</h4>
+                                        <span className="text-[10px] bg-white/10 text-slate-300 border border-white/15 px-2 py-0.5 rounded-full font-semibold">
                                             {unreadCount} unread
                                         </span>
                                     </div>
-                                    <div className="divide-y divide-slate-100">
+                                    <div className="divide-y divide-slate-900/60">
                                         {notifications.length === 0 ? (
-                                            <div className="p-8 text-center text-slate-400 text-xs italic">
-                                                No notifications yet
+                                            <div className="p-8 text-center text-slate-500 text-xs italic">
+                                                All quiet for now.
                                             </div>
                                         ) : (
                                             notifications.map(item => (
                                                 <div
                                                     key={item.id}
-                                                    className={`p-3.5 flex gap-2.5 text-xs transition hover:bg-slate-50/50 ${
-                                                        !item.is_read ? "bg-blue-50/10" : ""
+                                                    className={`p-3.5 flex gap-2.5 text-xs transition hover:bg-slate-900/40 ${
+                                                        !item.is_read ? "bg-slate-900/20" : ""
                                                     }`}
                                                 >
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-slate-650 leading-relaxed">{item.message}</p>
-                                                        <span className="text-[10px] text-slate-400 mt-1 block">
+                                                        <p className="text-slate-350 leading-relaxed">{item.message}</p>
+                                                        <span className="text-[9px] text-slate-500 mt-1 block">
                                                             {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                         </span>
                                                     </div>
                                                     {!item.is_read && (
                                                         <button
                                                             onClick={(e) => handleMarkAsRead(item.id, e)}
-                                                            className="text-blue-600 hover:text-blue-500 font-bold self-start text-[10px] cursor-pointer"
+                                                            className="text-brand-blue hover:text-blue-400 font-bold self-start text-[10px] cursor-pointer"
                                                         >
                                                             Dismiss
                                                         </button>
@@ -279,29 +291,29 @@ function DashboardLayout({ children }) {
                             <div className="relative" ref={avatarRef}>
                                 <button
                                     onClick={() => setShowUserDropdown(!showUserDropdown)}
-                                    className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm capitalize shadow cursor-pointer border-2 border-white hover:border-slate-100 transition"
+                                    className="w-8 h-8 rounded-xl text-white flex items-center justify-center font-bold text-sm capitalize shadow cursor-pointer border border-transparent hover:border-white/20 transition animate-fadeIn" style={{ background: 'linear-gradient(135deg, #334155, #64748b)' }}
                                 >
                                     {user.username ? user.username[0] : "U"}
                                 </button>
 
                                 {showUserDropdown && (
-                                    <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white border border-slate-200 shadow-xl z-50 py-1 animate-scaleUp">
-                                        <div className="px-4 py-2 border-b border-slate-100 bg-slate-50">
-                                            <p className="text-xs font-bold text-slate-800 truncate capitalize">{user.username}</p>
-                                            <p className="text-[10px] text-slate-450 truncate">{user.email || "No email linked"}</p>
+                                    <div className="absolute right-0 mt-2.5 w-48 rounded-xl glass-panel shadow-2xl z-50 py-1.5 border border-slate-800 animate-scaleUp">
+                                        <div className="px-4 py-2 border-b border-slate-900 bg-slate-900/40">
+                                            <p className="text-xs font-bold text-slate-200 truncate capitalize">{user.username}</p>
+                                            <p className="text-[10px] text-slate-500 truncate">{user.email || "No email linked"}</p>
                                         </div>
                                         <Link
                                             to="/profile"
                                             onClick={() => setShowUserDropdown(false)}
-                                            className="block px-4 py-2 text-xs text-slate-650 hover:bg-slate-50 hover:text-slate-900 transition"
+                                            className="block px-4 py-2.5 text-xs text-slate-400 hover:bg-slate-900/60 hover:text-white transition"
                                         >
-                                            Edit Profile
+                                            My Profile
                                         </Link>
                                         <button
                                             onClick={handleLogout}
-                                            className="w-full text-left block px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition font-bold border-t border-slate-100 cursor-pointer"
+                                            className="w-full text-left block px-4 py-2.5 text-xs text-rose-450 hover:bg-rose-950/20 hover:text-rose-400 transition font-bold border-t border-slate-900 cursor-pointer"
                                         >
-                                            Log Out
+                                            Sign Out
                                         </button>
                                     </div>
                                 )}
@@ -311,7 +323,7 @@ function DashboardLayout({ children }) {
                 </header>
 
                 {/* Content Panel */}
-                <main className="flex-1 overflow-y-auto p-8 relative">
+                <main className="flex-1 overflow-y-auto p-6 md:p-8 relative">
                     <div className="max-w-6xl mx-auto h-full">
                         {children}
                     </div>

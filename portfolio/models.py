@@ -40,6 +40,14 @@ class Portfolio(models.Model):
 
     show_stats = models.BooleanField(default=True)
 
+    show_location = models.BooleanField(default=True)
+
+    show_experience = models.BooleanField(default=True)
+
+    show_availability = models.BooleanField(default=True)
+
+    show_reputation = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     updated_at = models.DateTimeField(auto_now=True)
