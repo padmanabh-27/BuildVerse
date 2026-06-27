@@ -15,7 +15,8 @@ import {
     Layers, 
     ChevronLeft, 
     ChevronRight,
-    Settings
+    Settings,
+    Menu
 } from "lucide-react";
 
 function DashboardLayout({ children }) {
@@ -28,6 +29,7 @@ function DashboardLayout({ children }) {
     const [unreadCount, setUnreadCount] = useState(0);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showUserDropdown, setShowUserDropdown] = useState(false);
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
     const dropdownRef = useRef(null);
     const avatarRef = useRef(null);
@@ -148,7 +150,8 @@ function DashboardLayout({ children }) {
             <div className="absolute bottom-[5%] right-[5%] w-[350px] h-[350px] rounded-full blur-[120px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(203,213,225,0.03) 0%, transparent 70%)' }}></div>
 
             {/* Sidebar */}
-            <aside className={`glass-panel border-r border-slate-900 flex flex-col justify-between z-20 shrink-0 transition-all duration-300 relative ${
+            {/* Sidebar (Desktop) */}
+            <aside className={`hidden md:flex glass-panel border-r border-slate-900 flex-col justify-between z-20 shrink-0 transition-all duration-300 relative ${
                 sidebarCollapsed ? "w-20" : "w-64"
             }`}>
                 <div>
@@ -202,7 +205,7 @@ function DashboardLayout({ children }) {
                 <div className="p-4 border-t border-slate-900 bg-slate-950/20">
                     <button
                         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                        className="w-full flex items-center justify-center p-2 rounded-xl text-slate-500 hover:bg-slate-900/60 hover:text-slate-350 mb-3 cursor-pointer border border-transparent hover:border-slate-800 transition"
+                        className="w-full flex items-center justify-center p-2 rounded-xl text-slate-500 hover:bg-slate-900/60 hover:text-slate-355 mb-3 cursor-pointer border border-transparent hover:border-slate-800 transition"
                         title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
                     >
                         {sidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
@@ -222,11 +225,93 @@ function DashboardLayout({ children }) {
                 </div>
             </aside>
 
+            {/* Sidebar (Mobile Drawer overlay) */}
+            {mobileSidebarOpen && (
+                <div className="fixed inset-0 z-40 md:hidden flex">
+                    {/* Backdrop */}
+                    <div 
+                        className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+                        onClick={() => setMobileSidebarOpen(false)}
+                    ></div>
+
+                    {/* Drawer container */}
+                    <aside className="w-64 glass-panel border-r border-slate-900 h-full flex flex-col justify-between z-50 relative animate-slideRight">
+                        <div>
+                            {/* Header Logo */}
+                            <div className="h-16 px-5 border-b border-slate-900/60 flex items-center justify-between">
+                                <Link to="/dashboard" onClick={() => setMobileSidebarOpen(false)} className="flex items-center gap-2 font-black text-lg text-white font-display">
+                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md" style={{ background: 'linear-gradient(135deg, #334155, #64748b)' }}>
+                                        <Layers className="w-4 h-4 text-white" />
+                                    </div>
+                                    <span>Build<span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(135deg, #cbd5e1, #f8fafc)', WebkitBackgroundClip: 'text' }}>Verse</span></span>
+                                </Link>
+                                <button
+                                    onClick={() => setMobileSidebarOpen(false)}
+                                    className="p-1 rounded-lg text-slate-500 hover:text-white cursor-pointer"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Navigation Menu */}
+                            <nav className="p-4 space-y-1.5">
+                                {menuItems.map(item => {
+                                    const isActive = location.pathname === item.path;
+                                    return (
+                                        <Link
+                                            key={item.path}
+                                            to={item.path}
+                                            onClick={() => setMobileSidebarOpen(false)}
+                                            className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-all duration-200 group text-sm font-semibold relative ${
+                                                isActive
+                                                    ? "bg-slate-900/80 text-white border border-slate-800 shadow-inner glow-hover"
+                                                    : "text-slate-400 hover:bg-slate-900/40 hover:text-white border border-transparent"
+                                            }`}
+                                        >
+                                            {isActive && (
+                                                <div className="absolute left-0 top-1/4 bottom-1/4 w-0.5 rounded-r-full" style={{ background: 'linear-gradient(to bottom, #f8fafc, #94a3b8)' }}></div>
+                                            )}
+                                            <span className={isActive ? "text-white" : "text-slate-500 group-hover:text-slate-350"}>
+                                                {item.icon}
+                                            </span>
+                                            <span>{item.name}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+
+                        {/* User Summary */}
+                        <div className="p-4 border-t border-slate-900 bg-slate-950/20">
+                            {user && (
+                                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/40 border border-slate-900/80 text-xs">
+                                    <div className="w-8 h-8 rounded-xl text-white flex items-center justify-center font-bold capitalize shadow-sm text-sm" style={{ background: 'linear-gradient(135deg, #334155, #64748b)' }}>
+                                        {user.username ? user.username[0] : "U"}
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <p className="font-semibold text-slate-200 truncate capitalize">{user.username}</p>
+                                        <span className="text-[10px] text-slate-500 truncate block">Co-Builder</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </aside>
+                </div>
+            )}
+
             {/* Main Wrapper */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 {/* Header Navbar */}
                 <header className="h-16 px-6 border-b border-slate-900/60 glass-panel flex items-center justify-between z-10 shrink-0">
-                    <h2 className="text-base font-bold text-white tracking-tight font-display">{getPageTitle()}</h2>
+                    <div className="flex items-center gap-3.5">
+                        <button
+                            onClick={() => setMobileSidebarOpen(true)}
+                            className="md:hidden p-2 rounded-xl bg-slate-900/40 border border-slate-900 hover:border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-white transition flex items-center justify-center cursor-pointer"
+                        >
+                            <Menu className="w-4.5 h-4.5" />
+                        </button>
+                        <h2 className="text-base font-bold text-white tracking-tight font-display">{getPageTitle()}</h2>
+                    </div>
 
                     {/* Right side items */}
                     <div className="flex items-center gap-3.5">

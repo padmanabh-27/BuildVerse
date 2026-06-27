@@ -13,13 +13,17 @@ from .serializers import (
 )
 
 
+from rest_framework.permissions import IsAuthenticated
+
+
 class UserSearchView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
 
         query = request.GET.get("q", "")
 
-        users = User.objects.filter(username__icontains=query)
+        users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
 
         serializer = UserSearchSerializer(users, many=True)
 
