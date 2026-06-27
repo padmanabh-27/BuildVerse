@@ -106,14 +106,22 @@ function Projects() {
     };
 
     // Filter projects based on inputs
-    const filteredProjects = projects.filter(proj => {
-        const matchesSearch = searchQuery === "" || 
-            proj.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            proj.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const filteredProjects = (Array.isArray(projects) ? projects : []).filter(proj => {
+        if (!proj) return false;
         
-        const matchesCategory = filterCategory === "" || proj.category === filterCategory.toLowerCase();
-        const matchesDifficulty = filterDifficulty === "" || proj.difficulty === filterDifficulty.toLowerCase();
-        const matchesStatus = filterStatus === "" || proj.status === filterStatus.toLowerCase();
+        const titleStr = proj.title || "";
+        const descStr = proj.description || "";
+        const catStr = proj.category || "";
+        const diffStr = proj.difficulty || "";
+        const statusStr = proj.status || "";
+
+        const matchesSearch = searchQuery === "" || 
+            titleStr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            descStr.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        const matchesCategory = filterCategory === "" || catStr.toLowerCase() === filterCategory.toLowerCase();
+        const matchesDifficulty = filterDifficulty === "" || diffStr.toLowerCase() === filterDifficulty.toLowerCase();
+        const matchesStatus = filterStatus === "" || statusStr.toLowerCase() === filterStatus.toLowerCase();
 
         return matchesSearch && matchesCategory && matchesDifficulty && matchesStatus;
     });
@@ -243,13 +251,13 @@ function Projects() {
                                                     {diffBadge.label}
                                                 </span>
                                                 <span className={`px-2 py-0.5 rounded-lg text-[9px] font-extrabold border uppercase tracking-wider ${
-                                                    project.status === "recruiting" 
+                                                    (project.status || "") === "recruiting" 
                                                         ? "bg-amber-950/30 text-amber-400 border-amber-500/20" 
-                                                        : project.status === "in_progress" 
+                                                        : (project.status || "") === "in_progress" 
                                                             ? "bg-blue-950/30 text-blue-400 border-blue-500/20" 
                                                             : "bg-emerald-950/30 text-emerald-400 border-emerald-500/20"
                                                 }`}>
-                                                    {project.status.replace("_", " ")}
+                                                    {(project.status || "").replace("_", " ")}
                                                 </span>
                                             </div>
                                         </div>
