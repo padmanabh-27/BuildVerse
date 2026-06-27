@@ -18,7 +18,8 @@ import {
     ArrowUpRight,
     Tag,
     Clock,
-    X
+    X,
+    FolderGit2
 } from "lucide-react";
 
 function Projects() {
