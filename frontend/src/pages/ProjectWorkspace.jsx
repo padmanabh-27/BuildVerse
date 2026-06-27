@@ -29,6 +29,17 @@ import {
     User
 } from "lucide-react";
 
+const getBackendUrl = () => {
+    const apiBase = api.defaults.baseURL || "http://127.0.0.1:8000/api/";
+    if (apiBase.endsWith("/api/")) {
+        return apiBase.slice(0, -5);
+    }
+    if (apiBase.endsWith("/api")) {
+        return apiBase.slice(0, -4);
+    }
+    return "http://127.0.0.1:8000";
+};
+
 function ProjectWorkspace() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -988,7 +999,7 @@ function ProjectWorkspace() {
                                                     </div>
                                                     <div className="flex gap-3">
                                                         <a
-                                                            href={`http://127.0.0.1:8000${doc.file}`}
+                                                            href={`${getBackendUrl()}${doc.file}`}
                                                             download
                                                             target="_blank"
                                                             rel="noreferrer"

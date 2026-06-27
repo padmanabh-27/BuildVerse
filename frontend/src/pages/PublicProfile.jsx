@@ -256,36 +256,48 @@ function PublicProfile() {
                                 )}
                             </div>
                         </div>
-
-                        {/* Invite to Workspace (Creator only) */}
-                        {!isSelf && myProjects.length > 0 && (
+                        {!isSelf && (
                             <div className="p-6 rounded-2xl glass-panel border border-slate-900 shadow-xl space-y-4">
                                 <h3 className="text-xs font-bold text-white uppercase tracking-widest border-b border-slate-900 pb-3 flex items-center gap-2 font-display">
                                     <FolderGit2 className="w-4.5 h-4.5 text-brand-purple" /> Recruit for Workspace
                                 </h3>
-                                <p className="text-xs text-slate-450 leading-relaxed">Send an invitation request to collaborate on one of your managed projects.</p>
-                                
-                                <form onSubmit={handleSendInvitation} className="space-y-3.5 pt-2">
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-slate-550 uppercase mb-1.5 tracking-wider">Select Project</label>
-                                        <select
-                                            className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-900 text-xs text-slate-300 outline-none focus:border-brand-purple cursor-pointer"
-                                            value={selectedProjectId}
-                                            onChange={e => setSelectedProjectId(e.target.value)}
+                                {myProjects.length > 0 ? (
+                                    <>
+                                        <p className="text-xs text-slate-450 leading-relaxed">Send an invitation request to collaborate on one of your managed projects.</p>
+                                        
+                                        <form onSubmit={handleSendInvitation} className="space-y-3.5 pt-2">
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-slate-550 uppercase mb-1.5 tracking-wider">Select Project</label>
+                                                <select
+                                                    className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-900 text-xs text-slate-300 outline-none focus:border-brand-purple cursor-pointer"
+                                                    value={selectedProjectId}
+                                                    onChange={e => setSelectedProjectId(e.target.value)}
+                                                >
+                                                    {myProjects.map(project => (
+                                                        <option key={project.id} value={project.id} className="bg-slate-950">{project.title}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <button
+                                                type="submit"
+                                                disabled={inviting}
+                                                className="w-full py-2.5 bg-gradient-to-r from-brand-blue to-brand-purple hover:opacity-95 text-xs font-bold rounded-xl text-white transition active:scale-[0.98] cursor-pointer disabled:opacity-50 glow-btn"
+                                            >
+                                                {inviting ? "Sending invite..." : "Send Invite Request"}
+                                            </button>
+                                        </form>
+                                    </>
+                                ) : (
+                                    <div className="space-y-3.5 pt-1">
+                                        <p className="text-xs text-slate-455 leading-relaxed">You don't own any active projects to recruit for yet.</p>
+                                        <Link
+                                            to="/projects"
+                                            className="block text-center w-full py-2.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-brand-purple/40 text-xs font-bold rounded-xl text-slate-300 transition active:scale-[0.98]"
                                         >
-                                            {myProjects.map(project => (
-                                                <option key={project.id} value={project.id} className="bg-slate-950">{project.title}</option>
-                                            ))}
-                                        </select>
+                                            Create a Project Workspace
+                                        </Link>
                                     </div>
-                                    <button
-                                        type="submit"
-                                        disabled={inviting}
-                                        className="w-full py-2.5 bg-gradient-to-r from-brand-blue to-brand-purple hover:opacity-95 text-xs font-bold rounded-xl text-white transition active:scale-[0.98] cursor-pointer disabled:opacity-50 glow-btn"
-                                    >
-                                        {inviting ? "Sending invite..." : "Send Invite Request"}
-                                    </button>
-                                </form>
+                                )}
                             </div>
                         )}
                     </div>
